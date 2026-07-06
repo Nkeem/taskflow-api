@@ -2,6 +2,8 @@ server:
   port: 8080
 
 spring:
+  application:
+    name: taskflow-api
   datasource:
     url: jdbc:postgresql://localhost:5433/taskflow_db
     username: taskflow_user
@@ -10,5 +12,9 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
   liquibase:
     enabled: false

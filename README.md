@@ -13,7 +13,7 @@ TaskFlow API is a backend REST API for project and task management. It demonstra
 - Redis caching for project statistics
 - Kafka event publishing on task status changes
 - Validation and unified error responses
-- Postman collection
+- Postman collection for API testing and documentation
 - Unit tests
 
 ## Tech Stack
@@ -85,11 +85,13 @@ Start infrastructure:
 docker compose up -d
 ```
 
-Run application on Windows:
+Run application on Windows PowerShell:
 
 ```bash
-mvnw.cmd spring-boot:run
+.\mvnw.cmd spring-boot:run
 ```
+
+PowerShell requires `.\` when running scripts from the current directory.
 
 Run application on Linux/macOS:
 
@@ -267,13 +269,20 @@ Example event:
 - Import `postman/TaskFlow_Local.postman_environment.json`
 - Select `TaskFlow Local`
 - Run requests in order: Health -> Users -> Projects -> Tasks -> Filtering -> Statistics -> Redis Cache Check -> Kafka Event Check
+- Use Postman as the API testing and documentation tool for local verification.
 
 ## Tests
 
-Run tests on Windows:
+Run tests on Windows PowerShell:
 
 ```bash
-mvnw.cmd test
+.\mvnw.cmd test
+```
+
+Compile on Windows PowerShell:
+
+```bash
+.\mvnw.cmd clean compile
 ```
 
 Run tests on Linux/macOS:

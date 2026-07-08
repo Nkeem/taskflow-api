@@ -112,6 +112,18 @@ mvn spring-boot:run
 - Redis: localhost:6379
 - Kafka: localhost:9092
 
+## Frontend
+
+The demo React dashboard is located in `frontend/`. Start the backend on `http://localhost:8080`, then run:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+The frontend dev server starts on `http://localhost:5173` and proxies `/api` requests to the backend.
+
 ## Health Check
 
 ```http

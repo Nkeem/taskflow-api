@@ -48,3 +48,10 @@ Expected response:
   "service": "TaskFlow API"
 }
 ```
+
+## Postman
+
+- Import `postman/TaskFlow_API.postman_collection.json`
+- Import `postman/TaskFlow_Local.postman_environment.json`
+- Select `TaskFlow Local` environment
+- Run requests in order: Health -> Users -> Projects -> Tasks -> Filtering -> Statistics -> Redis Cache Check -> Kafka Event Check

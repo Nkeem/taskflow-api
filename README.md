@@ -123,6 +123,7 @@ npm run dev
 ```
 
 The frontend dev server starts on `http://localhost:5173` and proxies `/api` requests to the backend.
+It supports demo user/project setup, task management, filtering, statistics, and Redis/Kafka demonstration messages.
 
 ## Health Check
 

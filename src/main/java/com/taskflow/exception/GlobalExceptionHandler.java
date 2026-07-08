@@ -3,45 +3,34 @@ package com.taskflow.exception;
 import java.util.stream.Collectors;
 
 import com.taskflow.dto.response.ErrorResponse;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleResourceNotFoundException(
-            ResourceNotFoundException exception,
-            HttpServletRequest request
-    ) {
-        return buildResponse(HttpStatus.NOT_FOUND, exception.getMessage(), request);
-    }
+    @ExceptionHandler(BaseException.class)
+    public ResponseEntity<ErrorResponse> handleBaseException(BaseException exception) {
+        BusinessError error = exception.getError();
+        log.warn("Business exception: {}", exception.getMessage());
 
-    @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<ErrorResponse> handleBadRequestException(
-            BadRequestException exception,
-            HttpServletRequest request
-    ) {
-        return buildResponse(HttpStatus.BAD_REQUEST, exception.getMessage(), request);
-    }
+        ErrorResponse response = new ErrorResponse(
+                error.getCode(),
+                exception.getMessage()
+        );
 
-    @ExceptionHandler(DuplicateResourceException.class)
-    public ResponseEntity<ErrorResponse> handleDuplicateResourceException(
-            DuplicateResourceException exception,
-            HttpServletRequest request
-    ) {
-        return buildResponse(HttpStatus.CONFLICT, exception.getMessage(), request);
+        return ResponseEntity.status(error.getHttpStatus()).body(response);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(
-            MethodArgumentNotValidException exception,
-            HttpServletRequest request
+            MethodArgumentNotValidException exception
     ) {
         String message = exception.getBindingResult()
                 .getFieldErrors()
@@ -49,42 +38,40 @@ public class GlobalExceptionHandler {
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
                 .collect(Collectors.joining("; "));
 
-        return buildResponse(HttpStatus.BAD_REQUEST, message, request);
+        ErrorResponse response = new ErrorResponse(
+                BusinessError.VALIDATION_ERROR.getCode(),
+                message
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ErrorResponse> handleConstraintViolationException(
-            ConstraintViolationException exception,
-            HttpServletRequest request
+            ConstraintViolationException exception
     ) {
         String message = exception.getConstraintViolations()
                 .stream()
                 .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
                 .collect(Collectors.joining("; "));
 
-        return buildResponse(HttpStatus.BAD_REQUEST, message, request);
+        ErrorResponse response = new ErrorResponse(
+                BusinessError.VALIDATION_ERROR.getCode(),
+                message
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleException(
-            Exception exception,
-            HttpServletRequest request
-    ) {
-        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage(), request);
-    }
+    public ResponseEntity<ErrorResponse> handleException(Exception exception) {
+        log.error("Unhandled exception", exception);
 
-    private ResponseEntity<ErrorResponse> buildResponse(
-            HttpStatus status,
-            String message,
-            HttpServletRequest request
-    ) {
-        ErrorResponse response = ErrorResponse.of(
-                status.value(),
-                status.getReasonPhrase(),
-                message,
-                request.getRequestURI()
+        ErrorResponse response = new ErrorResponse(
+                BusinessError.INTERNAL_SERVER_ERROR.getCode(),
+                BusinessError.INTERNAL_SERVER_ERROR.getMessage()
         );
 
-        return ResponseEntity.status(status).body(response);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 }

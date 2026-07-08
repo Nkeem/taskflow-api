@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @Slf4j
 @RestControllerAdvice
@@ -54,6 +55,20 @@ public class GlobalExceptionHandler {
                 .stream()
                 .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
                 .collect(Collectors.joining("; "));
+
+        ErrorResponse response = new ErrorResponse(
+                BusinessError.VALIDATION_ERROR.getCode(),
+                message
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatchException(
+            MethodArgumentTypeMismatchException exception
+    ) {
+        String message = exception.getName() + ": invalid value";
 
         ErrorResponse response = new ErrorResponse(
                 BusinessError.VALIDATION_ERROR.getCode(),

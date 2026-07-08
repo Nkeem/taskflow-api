@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,6 +19,8 @@ import com.taskflow.dto.request.CreateTaskRequest;
 import com.taskflow.dto.request.UpdateTaskRequest;
 import com.taskflow.dto.request.UpdateTaskStatusRequest;
 import com.taskflow.dto.response.TaskResponse;
+import com.taskflow.enums.TaskPriority;
+import com.taskflow.enums.TaskStatus;
 import com.taskflow.service.TaskService;
 import lombok.RequiredArgsConstructor;
 
@@ -38,8 +41,12 @@ public class TaskController {
     }
 
     @GetMapping("/projects/{projectId}/tasks")
-    public List<TaskResponse> getTasksByProjectId(@PathVariable Long projectId) {
-        return taskService.getTasksByProjectId(projectId);
+    public List<TaskResponse> getTasksByProjectId(
+            @PathVariable Long projectId,
+            @RequestParam(required = false) TaskStatus status,
+            @RequestParam(required = false) TaskPriority priority
+    ) {
+        return taskService.getTasksByProjectId(projectId, status, priority);
     }
 
     @GetMapping("/tasks/{id}")

@@ -12,6 +12,8 @@ import com.taskflow.dto.response.TaskResponse;
 import com.taskflow.entity.ProjectEntity;
 import com.taskflow.entity.TaskEntity;
 import com.taskflow.entity.UserEntity;
+import com.taskflow.enums.TaskPriority;
+import com.taskflow.enums.TaskStatus;
 import com.taskflow.exception.BaseException;
 import com.taskflow.exception.BusinessError;
 import com.taskflow.mapper.TaskMapper;
@@ -46,10 +48,26 @@ public class TaskService {
         return TaskMapper.toResponse(savedTask);
     }
 
-    public List<TaskResponse> getTasksByProjectId(Long projectId) {
+    public List<TaskResponse> getTasksByProjectId(
+            Long projectId,
+            TaskStatus status,
+            TaskPriority priority
+    ) {
         projectService.getProjectEntityById(projectId);
 
-        return taskRepository.findByProjectId(projectId)
+        List<TaskEntity> tasks;
+
+        if (status == null && priority == null) {
+            tasks = taskRepository.findByProjectId(projectId);
+        } else if (status != null && priority == null) {
+            tasks = taskRepository.findByProjectIdAndStatus(projectId, status);
+        } else if (status == null) {
+            tasks = taskRepository.findByProjectIdAndPriority(projectId, priority);
+        } else {
+            tasks = taskRepository.findByProjectIdAndStatusAndPriority(projectId, status, priority);
+        }
+
+        return tasks
                 .stream()
                 .map(TaskMapper::toResponse)
                 .toList();

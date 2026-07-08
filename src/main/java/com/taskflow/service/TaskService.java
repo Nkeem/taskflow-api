@@ -28,6 +28,7 @@ public class TaskService {
     private final TaskRepository taskRepository;
     private final ProjectService projectService;
     private final UserService userService;
+    private final ProjectStatisticsCacheService projectStatisticsCacheService;
 
     @Transactional
     public TaskResponse createTask(Long projectId, CreateTaskRequest request) {
@@ -45,6 +46,7 @@ public class TaskService {
                 .build();
 
         TaskEntity savedTask = taskRepository.save(task);
+        projectStatisticsCacheService.evictProjectStatistics(projectId);
         return TaskMapper.toResponse(savedTask);
     }
 
@@ -80,6 +82,7 @@ public class TaskService {
     @Transactional
     public TaskResponse updateTask(Long id, UpdateTaskRequest request) {
         TaskEntity task = getTaskEntityById(id);
+        Long projectId = task.getProject().getId();
 
         if (request.title() != null) {
             task.setTitle(request.title());
@@ -102,28 +105,29 @@ public class TaskService {
         }
 
         TaskEntity updatedTask = taskRepository.save(task);
+        projectStatisticsCacheService.evictProjectStatistics(projectId);
         return TaskMapper.toResponse(updatedTask);
     }
 
     @Transactional
     public TaskResponse updateTaskStatus(Long id, UpdateTaskStatusRequest request) {
         TaskEntity task = getTaskEntityById(id);
+        Long projectId = task.getProject().getId();
+
         task.setStatus(request.status());
 
         TaskEntity updatedTask = taskRepository.save(task);
+        projectStatisticsCacheService.evictProjectStatistics(projectId);
         return TaskMapper.toResponse(updatedTask);
     }
 
     @Transactional
     public void deleteTask(Long id) {
-        if (!taskRepository.existsById(id)) {
-            throw new BaseException(
-                    BusinessError.TASK_NOT_FOUND,
-                    "Task with id " + id + " not found"
-            );
-        }
+        TaskEntity task = getTaskEntityById(id);
+        Long projectId = task.getProject().getId();
 
-        taskRepository.deleteById(id);
+        taskRepository.delete(task);
+        projectStatisticsCacheService.evictProjectStatistics(projectId);
     }
 
     public TaskEntity getTaskEntityById(Long id) {

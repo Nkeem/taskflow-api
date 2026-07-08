@@ -1,5 +1,7 @@
 package com.taskflow.dto.response;
 
+import java.io.Serializable;
+
 public record ProjectStatisticsResponse(
         Long projectId,
         long totalTasks,
@@ -8,5 +10,5 @@ public record ProjectStatisticsResponse(
         long done,
         long highPriority,
         long overdue
-) {
+) implements Serializable {
 }

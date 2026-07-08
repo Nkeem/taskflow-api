@@ -3,6 +3,7 @@ package com.taskflow.service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,7 +13,9 @@ import com.taskflow.enums.TaskPriority;
 import com.taskflow.enums.TaskStatus;
 import com.taskflow.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -21,7 +24,9 @@ public class ProjectStatisticsService {
     private final ProjectService projectService;
     private final TaskRepository taskRepository;
 
+    @Cacheable(value = "projectStatistics", key = "#projectId")
     public ProjectStatisticsResponse getProjectStatistics(Long projectId) {
+        log.info("Calculating statistics for project id: {}", projectId);
         projectService.getProjectEntityById(projectId);
 
         List<TaskEntity> tasks = taskRepository.findByProjectId(projectId);

@@ -1,5 +1,6 @@
 package com.taskflow.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -16,6 +17,8 @@ import com.taskflow.enums.TaskPriority;
 import com.taskflow.enums.TaskStatus;
 import com.taskflow.exception.BaseException;
 import com.taskflow.exception.BusinessError;
+import com.taskflow.kafka.event.TaskStatusChangedEvent;
+import com.taskflow.kafka.producer.TaskEventProducer;
 import com.taskflow.mapper.TaskMapper;
 import com.taskflow.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +32,7 @@ public class TaskService {
     private final ProjectService projectService;
     private final UserService userService;
     private final ProjectStatisticsCacheService projectStatisticsCacheService;
+    private final TaskEventProducer taskEventProducer;
 
     @Transactional
     public TaskResponse createTask(Long projectId, CreateTaskRequest request) {
@@ -113,11 +117,20 @@ public class TaskService {
     public TaskResponse updateTaskStatus(Long id, UpdateTaskStatusRequest request) {
         TaskEntity task = getTaskEntityById(id);
         Long projectId = task.getProject().getId();
+        TaskStatus oldStatus = task.getStatus();
 
         task.setStatus(request.status());
 
-        TaskEntity updatedTask = taskRepository.save(task);
+        TaskEntity updatedTask = taskRepository.saveAndFlush(task);
         projectStatisticsCacheService.evictProjectStatistics(projectId);
+        taskEventProducer.sendTaskStatusChangedEvent(new TaskStatusChangedEvent(
+                updatedTask.getId(),
+                projectId,
+                "TASK_STATUS_CHANGED",
+                oldStatus,
+                updatedTask.getStatus(),
+                LocalDateTime.now()
+        ));
         return TaskMapper.toResponse(updatedTask);
     }
 

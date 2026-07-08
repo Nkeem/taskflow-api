@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.taskflow.dto.request.CreateProjectRequest;
 import com.taskflow.dto.response.ProjectResponse;
+import com.taskflow.dto.response.ProjectStatisticsResponse;
 import com.taskflow.service.ProjectService;
+import com.taskflow.service.ProjectStatisticsService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -24,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 public class ProjectController {
 
     private final ProjectService projectService;
+    private final ProjectStatisticsService projectStatisticsService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -39,6 +42,11 @@ public class ProjectController {
     @GetMapping("/{id}")
     public ProjectResponse getProjectById(@PathVariable Long id) {
         return projectService.getProjectById(id);
+    }
+
+    @GetMapping("/{projectId}/stats")
+    public ProjectStatisticsResponse getProjectStatistics(@PathVariable Long projectId) {
+        return projectStatisticsService.getProjectStatistics(projectId);
     }
 
     @GetMapping("/owner/{ownerId}")

@@ -2,6 +2,26 @@
 
 TaskFlow API is a backend REST API for project and task management. It demonstrates a modern Java backend stack with Spring Boot, PostgreSQL, Liquibase, Redis caching, Kafka events, Docker Compose, Postman and unit tests.
 
+## Screenshots
+
+TaskFlow includes a React demo frontend dashboard that connects to the Spring Boot backend API and demonstrates project management, task management, statistics, Redis cache invalidation and Kafka task status events.
+
+### Dashboard
+
+![TaskFlow Dashboard](docs/screenshots/dashboard.png)
+
+### Task Management
+
+![Task Management](docs/screenshots/tasks.png)
+
+### Project Statistics
+
+![Project Statistics](docs/screenshots/statistics.png)
+
+### Activity Panel
+
+![Activity Panel](docs/screenshots/activity.png)
+
 ## Features
 
 - User management
@@ -122,7 +142,14 @@ npm install
 npm run dev
 ```
 
-The frontend dev server starts on `http://localhost:5173` and proxies `/api` requests to the backend.
+On Windows PowerShell, if the browser cannot reach the dev server through the default host, run:
+
+```bash
+cd frontend
+npm run dev -- --host 127.0.0.1
+```
+
+The frontend dev server starts on `http://localhost:5173` or `http://127.0.0.1:5173/` and proxies `/api` requests to the backend.
 It supports demo user/project setup, task management, filtering, statistics, and Redis/Kafka demonstration messages.
 
 ## Health Check

@@ -367,4 +367,4 @@ docker exec -it taskflow-kafka /opt/kafka/bin/kafka-topics.sh --bootstrap-server
 
 ## Project Status
 
-This is a portfolio backend project. Authentication is not included in v1 and may be added later.
+This is a portfolio backend project. Authentication is not included in his version and may be added later.
